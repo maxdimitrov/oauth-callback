@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>OLX callback</title>
+<style>
+  :root { --bg:#fff; --fg:#111; --muted:#666; --box:#f4f4f4; --accent:#0a66c2; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111; --fg:#eee; --muted:#999; --box:#222; --accent:#6cb4ff; } }
+  body { margin:0; padding:32px 16px; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui, sans-serif; }
+  main { max-width:640px; margin:0 auto; }
+  h1 { font-size:20px; margin:0 0 8px; }
+  p { margin:8px 0; color:var(--muted); }
+  code, textarea { font:14px/1.4 ui-monospace, Consolas, monospace; }
+  textarea { width:100%; box-sizing:border-box; padding:12px; background:var(--box); color:var(--fg); border:1px solid var(--muted); border-radius:6px; resize:vertical; }
+  button { margin-top:8px; padding:8px 14px; border:0; border-radius:6px; background:var(--accent); color:#fff; font-size:15px; cursor:pointer; }
+  .err { color:#c0392b; }
+</style>
+</head>
+<body>
+<main>
+  <h1>OLX authorization callback</h1>
+  <div id="out"></div>
+</main>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var out = document.getElementById('out');
+  var code = q.get('code'), state = q.get('state'), err = q.get('error');
+  if (err) {
+    out.innerHTML = '<p class="err">OLX returned an error: <code></code></p>';
+    out.querySelector('code').textContent = err + (q.get('error_description') ? ' - ' + q.get('error_description') : '');
+    return;
+  }
+  if (!code) {
+    out.innerHTML = '<p>Nothing to show. This page only displays the authorization code OLX sends after you approve the app.</p>';
+    return;
+  }
+  out.innerHTML =
+    '<p>Copy the full URL below and paste it into the script prompt.</p>' +
+    '<textarea id="url" rows="4" readonly></textarea>' +
+    '<button id="copy">Copy URL</button>' +
+    '<p>state: <code id="st"></code></p>';
+  document.getElementById('url').value = location.href;
+  document.getElementById('st').textContent = state || '(none)';
+  document.getElementById('copy').onclick = function () {
+    navigator.clipboard.writeText(location.href).then(function () {
+      document.getElementById('copy').textContent = 'Copied';
+    });
+  };
+})();
+</script>
+</body>
+</html>
